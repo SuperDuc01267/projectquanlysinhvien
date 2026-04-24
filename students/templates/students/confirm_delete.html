@@ -1,0 +1,20 @@
+{% extends "students/base.html" %}
+
+{% block title %}Xác nhận xóa{% endblock %}
+
+{% block content %}
+<section class="form-shell">
+    <div class="form-card">
+        <span class="eyebrow">Cảnh báo</span>
+        <h1>Xác nhận xóa dữ liệu</h1>
+        <p>Bạn sắp xóa mục <strong>{{ object }}</strong>. Hành động này không thể hoàn tác.</p>
+        <form method="post" class="styled-form">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button class="danger-button" type="submit">Xác nhận xóa</button>
+                <a class="secondary-button" href="javascript:history.back()">Hủy</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

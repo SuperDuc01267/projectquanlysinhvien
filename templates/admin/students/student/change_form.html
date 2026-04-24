@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+
+{% block content_title %}
+<div class="admin-page-hero">
+    <div>
+        <p class="admin-page-kicker">Django Admin / Sinh viên</p>
+        <h1>{% if original %}Cập nhật sinh viên{% else %}Thêm sinh viên{% endif %}</h1>
+        <p class="admin-page-subtitle">
+            Hồ sơ sinh viên được dùng để liên kết điểm số, tài khoản đăng nhập và thời khóa biểu
+        </p>
+    </div>
+</div>
+{% endblock %}

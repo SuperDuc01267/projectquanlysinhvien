@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hệ thống xử lý điểm sinh viên{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'students/styles.css' %}">
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            {% if user.is_authenticated and not user.is_staff %}
+                <a class="brand" href="{% url 'students:student_result' %}">
+                    <span class="brand-mark">SV</span>
+                    <span class="brand-text">
+                        <strong>Cổng thông tin sinh viên</strong>
+                        <small>Theo dõi học tập cá nhân</small>
+                    </span>
+                </a>
+            {% else %}
+                <a class="brand" href="{% url 'students:home' %}">
+                    <span class="brand-mark">SS</span>
+                    <span class="brand-text">
+                        <strong></strong>
+                        <small>Hệ thống học tập dành cho sinh viên</small>
+                    </span>
+                </a>
+            {% endif %}
+
+            <nav class="nav-links">
+                {% if user.is_authenticated and not user.is_staff %}
+                    <a href="{% url 'students:student_profile' %}">Trang cá nhân</a>
+                    <a href="{% url 'students:student_result' %}">Kết quả học tập</a>
+                    <a href="{% url 'students:student_schedule' %}">Thời khóa biểu</a>
+                    <a href="{% url 'students:student_exam_schedule' %}">Lịch thi</a>
+                {% elif user.is_authenticated and user.is_staff %}
+                    <a href="/admin/">Trang quản trị</a>
+                {% else %}
+                   
+                {% endif %}
+            </nav>
+
+            <div class="user-actions">
+                {% if user.is_authenticated %}
+                    <span class="welcome">Xin chào, {{ user.get_full_name|default:user.username }}</span>
+                    <form method="post" action="{% url 'students:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="ghost-button">Đăng xuất</button>
+                    </form>
+                {% else %}
+                    <a class="primary-button" href="{% url 'students:login' %}">Đăng nhập sinh viên</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="container page-content">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash flash-{{ message.tags|default:'info' }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

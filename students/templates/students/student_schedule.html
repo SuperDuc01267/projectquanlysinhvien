@@ -1,0 +1,266 @@
+{% extends "students/base.html" %}
+
+{% block title %}Thời khóa biểu{% endblock %}
+
+{% block extra_styles %}
+<style>
+.schedule-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    padding: 18px;
+    border: 2px solid rgba(15, 118, 110, 0.14);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.schedule-filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+}
+
+.schedule-filter-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.schedule-filter-form input {
+    min-width: 220px;
+    padding: 12px 14px;
+    border: 1px solid rgba(17, 32, 54, 0.14);
+    border-radius: 14px;
+    font: inherit;
+}
+
+.schedule-week-note {
+    color: #667085;
+    font-size: 0.95rem;
+}
+
+.result-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+    padding: 18px;
+    border: 2px solid rgba(15, 118, 110, 0.14);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.result-toolbar p {
+    margin: 0;
+    color: #667085;
+}
+
+.result-export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.timetable-panel {
+    padding: 20px;
+    border: 2px solid rgba(17, 32, 54, 0.12);
+}
+
+.timetable-board-wrap {
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.timetable-board {
+    display: grid;
+    grid-template-columns: 120px repeat(7, minmax(110px, 1fr));
+    --row-h: 68px;
+    grid-auto-rows: var(--row-h);
+    gap: 8px;
+}
+
+.timetable-corner,
+.timetable-day-header,
+.timetable-time-cell,
+.timetable-grid-cell,
+.timetable-card {
+    border-radius: 18px;
+}
+
+.timetable-corner,
+.timetable-day-header,
+.timetable-time-cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px solid rgba(17, 32, 54, 0.08);
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+}
+
+.timetable-corner {
+    align-items: center;
+    text-align: center;
+    font-weight: 700;
+    color: #0f766e;
+}
+
+.timetable-day-header {
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    font-weight: 700;
+    border-color: rgba(15, 118, 110, 0.16);
+    background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(29, 78, 216, 0.14));
+}
+
+.timetable-day-header span {
+    font-size: 0.9rem;
+    color: #667085;
+}
+
+.timetable-day-header.is-selected {
+    border-color: rgba(15, 118, 110, 0.55);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+}
+
+.timetable-time-cell span {
+    color: #667085;
+    margin-top: 6px;
+    font-size: 0.92rem;
+}
+
+.timetable-grid-cell {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(240, 247, 255, 0.96));
+    border: 2px dashed rgba(17, 32, 54, 0.12);
+}
+
+.timetable-card {
+    z-index: 2;
+    align-self: stretch;
+    padding: 8px 10px;
+    color: white;
+    background: linear-gradient(160deg, #0f766e, #1d4ed8);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 10px 22px rgba(29, 78, 216, 0.14);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.timetable-card strong {
+    font-size: 0.95rem;
+    line-height: 1.2;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.timetable-card span,
+.timetable-card small,
+.timetable-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.timetable-card p {
+    font-size: 0.78rem;
+    line-height: 1.2;
+}
+
+.timetable-card small {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.95;
+}
+
+@media (max-width: 980px) {
+    .timetable-board {
+        grid-template-columns: 130px repeat(7, minmax(140px, 1fr));
+        grid-auto-rows: 96px;
+        min-width: 1140px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <div>
+        <span class="eyebrow">Khu vực học sinh</span>
+        <h1>Thời khóa biểu cá nhân</h1>
+        <p>Hiển thị theo tuần của ngày bạn chọn. Lịch học chỉ hiện khi còn hiệu lực trong khoảng thời gian được admin thiết lập.</p>
+    </div>
+</section>
+
+<section class="schedule-filter-bar">
+    <form method="get" class="schedule-filter-form">
+        <div>
+            <label for="schedule-date">Chọn ngày xem lịch</label>
+            <input id="schedule-date" type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+        </div>
+        <button class="primary-button" type="submit">Lọc thời khóa biểu</button>
+    </form>
+    <div class="schedule-week-note">
+        Tuần đang xem: {{ week_start|date:"d/m/Y" }} - {{ week_end|date:"d/m/Y" }}
+    </div>
+</section>
+
+<section class="result-toolbar">
+    <div>
+        <strong>Xuất thời khóa biểu</strong>
+        <p>Tải file Excel hoặc mở bản in PDF theo ngày bạn đang lọc.</p>
+    </div>
+    <div class="result-export-actions">
+        <a class="secondary-button" href="{% url 'students:student_schedule_excel' %}?date={{ selected_date|date:'Y-m-d' }}">Xuất Excel</a>
+        <a class="primary-button" href="{% url 'students:student_schedule_pdf' %}?date={{ selected_date|date:'Y-m-d' }}" target="_blank" rel="noopener">In / Lưu PDF</a>
+    </div>
+</section>
+
+<section class="panel timetable-panel">
+    {% if timetable_cards %}
+    <div class="timetable-board-wrap">
+        <div class="timetable-board">
+            <div class="timetable-corner">Tiết / Giờ</div>
+            {% for day in week_dates %}
+            <div class="timetable-day-header{% if day.is_selected %} is-selected{% endif %}">
+                <strong>{{ day.label }}</strong>
+                <span>{{ day.date|date:"d/m" }}</span>
+            </div>
+            {% endfor %}
+
+            {% for period in timetable_periods %}
+            <div class="timetable-time-cell">
+                <strong>{{ period.label }}</strong>
+                <span>{{ period.start }} - {{ period.end }}</span>
+            </div>
+            {% for day in week_dates %}
+            <div class="timetable-grid-cell"></div>
+            {% endfor %}
+            {% endfor %}
+
+            {% for card in timetable_cards %}
+            <article class="timetable-card" style="grid-column: {{ card.grid_column }}; grid-row: {{ card.grid_row }} / span {{ card.row_span }};">
+                <strong>{{ card.item.subject.name }}</strong>
+                <span>Phòng: {{ card.item.room }}</span>
+                <small>{{ card.item.start_time|time:"H:i" }} - {{ card.item.end_time|time:"H:i" }}</small>
+                <small>Hiệu lực: {{ card.item.effective_from|date:"d/m/Y" }} - {{ card.item.effective_to|date:"d/m/Y" }}</small>
+                {% if card.item.note %}
+                <p>{{ card.item.note }}</p>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">Không có lịch học nào có hiệu lực tại ngày bạn đã chọn.</div>
+    {% endif %}
+</section>
+{% endblock %}

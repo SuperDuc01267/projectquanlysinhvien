@@ -1,0 +1,29 @@
+{% extends "students/base.html" %}
+
+{% block title %}Thời khóa biểu{% endblock %}
+
+{% block content %}
+<section class="form-shell">
+    <div class="form-card">
+        <span class="eyebrow">Quản trị viên</span>
+        <h1>{% if form.instance.pk %}Cập nhật thời khóa biểu{% else %}Thêm thời khóa biểu{% endif %}</h1>
+        <p>Gán lịch học cho từng sinh viên theo môn học, thứ, phòng và khung giờ cụ thể.</p>
+        <form method="post" class="styled-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-error">{{ field.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <div class="form-actions">
+                <button class="primary-button" type="submit">Lưu dữ liệu</button>
+                <a class="secondary-button" href="{% url 'students:schedule_list' %}">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

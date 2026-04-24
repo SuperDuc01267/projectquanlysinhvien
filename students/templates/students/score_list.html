@@ -1,0 +1,52 @@
+{% extends "students/base.html" %}
+
+{% block title %}Quản lý bảng điểm{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <div>
+        <span class="eyebrow">Quản trị viên</span>
+        <h1>Quản lý bảng điểm</h1>
+        <p>Nhập điểm từng môn, hệ thống sẽ tự tính điểm tổng kết và học lực cho sinh viên.</p>
+    </div>
+    <a class="primary-button" href="{% url 'students:score_add' %}">Thêm bảng điểm</a>
+</section>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Sinh viên</th>
+                    <th>Môn học</th>
+                    <th>Quá trình</th>
+                    <th>Giữa kỳ</th>
+                    <th>Cuối kỳ</th>
+                    <th>Tổng kết</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                    <tr>
+                        <td>{{ score.student }}</td>
+                        <td>{{ score.subject }}</td>
+                        <td>{{ score.attendance_score }}</td>
+                        <td>{{ score.midterm_score }}</td>
+                        <td>{{ score.final_exam_score }}</td>
+                        <td><strong>{{ score.final_score }}</strong></td>
+                        <td class="actions-cell">
+                            <a class="table-link" href="{% url 'students:score_edit' score.pk %}">Sửa</a>
+                            <a class="table-link danger" href="{% url 'students:score_delete' score.pk %}">Xóa</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="empty-state">Chưa có bảng điểm nào.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

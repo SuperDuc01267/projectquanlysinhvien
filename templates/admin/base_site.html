@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/students-admin.css' %}" />
+{% endblock %}
+
+{% block branding %}
+<div class="custom-admin-brand">
+  <div class="custom-admin-brand__mark">SS</div>
+  <div>
+    <h1 id="site-name">
+      <a href="{% url 'admin:index' %}">Admin Student</a>
+    </h1>
+    <p>Quản trị hệ thống điểm sinh viên</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+{% endblock %}
+
+{% block dark-mode-vars %}
+{% endblock %}
+
+{% block usertools %}
+{% if has_permission %}
+<div id="user-tools">
+
+  {% block welcome-msg %}
+    {% translate 'Welcome,' %}
+    <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+  {% endblock %}
+
+  {% block userlinks %}
+
+    {% if user.is_active and user.is_staff %}
+      {% url 'django-admindocs-docroot' as docsroot %}
+      {% if docsroot %}
+        <a href="{{ docsroot }}">{% translate 'Documentation' %}</a> /
+      {% endif %}
+    {% endif %}
+
+    <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+      {% csrf_token %}
+      <button type="submit">{% translate 'Log out' %}</button>
+    </form>
+
+  {% endblock %}
+
+</div>
+{% endif %}
+{% endblock %}

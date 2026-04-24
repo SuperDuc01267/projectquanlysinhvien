@@ -1,0 +1,35 @@
+{% extends "students/base.html" %}
+
+{% block title %}Đăng nhập học sinh{% endblock %}
+
+{% block content %}
+<section class="login-shell">
+    <div class="login-copy">
+        <span class="eyebrow">Cổng thông tin học sinh</span>
+        <h1>Đăng nhập để xem kết quả học tập và thời khóa biểu cá nhân</h1>
+        <p>
+            Sau khi đăng nhập, học sinh chỉ có quyền xem thông tin của chính mình.
+            Mọi thao tác thêm, sửa, xóa dữ liệu đều thuộc quyền của quản trị viên.
+        </p>
+    </div>
+    <div class="login-card">
+        <h2>Đăng nhập</h2>
+        <form method="post" class="styled-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-error">{{ field.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% if form.non_field_errors %}
+                <div class="field-error">{{ form.non_field_errors|join:", " }}</div>
+            {% endif %}
+            <button class="primary-button" type="submit">Đăng nhập</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

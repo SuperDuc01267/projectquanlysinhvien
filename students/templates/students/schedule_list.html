@@ -1,0 +1,52 @@
+{% extends "students/base.html" %}
+
+{% block title %}Quản lý thời khóa biểu{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <div>
+        <span class="eyebrow">Quản trị viên</span>
+        <h1>Quản lý thời khóa biểu</h1>
+        <p>Tạo lịch học để học sinh có thể xem sau khi đăng nhập vào cổng cá nhân.</p>
+    </div>
+    <a class="primary-button" href="{% url 'students:schedule_add' %}">Thêm lịch học</a>
+</section>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Sinh viên</th>
+                    <th>Môn học</th>
+                    <th>Thứ</th>
+                    <th>Phòng</th>
+                    <th>Bắt đầu</th>
+                    <th>Kết thúc</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in schedules %}
+                    <tr>
+                        <td>{{ item.student }}</td>
+                        <td>{{ item.subject.name }}</td>
+                        <td>{{ item.get_weekday_display }}</td>
+                        <td>{{ item.room }}</td>
+                        <td>{{ item.start_time|time:"H:i" }}</td>
+                        <td>{{ item.end_time|time:"H:i" }}</td>
+                        <td class="actions-cell">
+                            <a class="table-link" href="{% url 'students:schedule_edit' item.pk %}">Sửa</a>
+                            <a class="table-link danger" href="{% url 'students:schedule_delete' item.pk %}">Xóa</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="empty-state">Chưa có thời khóa biểu nào.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

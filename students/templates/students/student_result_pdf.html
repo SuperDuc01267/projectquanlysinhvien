@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Kết quả học tập</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            color: #132238;
+            margin: 32px;
+        }
+        .print-sheet {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+        .print-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 20px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #132238;
+            padding-bottom: 18px;
+        }
+        .print-head h1 {
+            margin: 0 0 10px;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 24px;
+            margin-bottom: 22px;
+        }
+        .summary-box {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+        .summary-item {
+            border: 1px solid #132238;
+            border-radius: 12px;
+            padding: 12px 16px;
+            min-width: 180px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #132238;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #e6f2ef;
+        }
+        .print-actions {
+            margin-top: 24px;
+        }
+        @media print {
+            .print-actions {
+                display: none;
+            }
+            body {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-sheet">
+        <div class="print-head">
+            <div>
+                <h1>Phiếu kết quả học tập</h1>
+                <div>Hệ thống xử lý điểm sinh viên</div>
+            </div>
+            <div>Ngày xuất: {{ generated_at|date:"d/m/Y H:i" }}</div>
+        </div>
+
+        <div class="meta-grid">
+            <div><strong>Họ tên:</strong> {{ student.full_name }}</div>
+            <div><strong>Mã sinh viên:</strong> {{ student.student_code }}</div>
+            <div><strong>Lớp:</strong> {{ student.class_name }}</div>
+            <div><strong>Email:</strong> {{ student.email }}</div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-item">
+                <strong>Điểm trung bình</strong>
+                <div>{{ average_score }}</div>
+            </div>
+            <div class="summary-item">
+                <strong>Học lực</strong>
+                <div>{{ classification }}</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã môn</th>
+                    <th>Môn học</th>
+                    <th>Quá trình</th>
+                    <th>Giữa kỳ</th>
+                    <th>Cuối kỳ</th>
+                    <th>Tổng kết</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                <tr>
+                    <td>{{ score.subject.subject_code }}</td>
+                    <td>{{ score.subject.name }}</td>
+                    <td>{{ score.attendance_score }}</td>
+                    <td>{{ score.midterm_score }}</td>
+                    <td>{{ score.final_exam_score }}</td>
+                    <td>{{ score.final_score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="print-actions">
+            <button onclick="window.print()">In / Lưu PDF</button>
+        </div>
+    </div>
+</body>
+</html>

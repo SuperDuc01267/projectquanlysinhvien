@@ -1,0 +1,29 @@
+{% extends "students/base.html" %}
+
+{% block title %}Bảng điểm{% endblock %}
+
+{% block content %}
+<section class="form-shell">
+    <div class="form-card">
+        <span class="eyebrow">Quản trị viên</span>
+        <h1>{% if form.instance.pk %}Cập nhật bảng điểm{% else %}Thêm bảng điểm{% endif %}</h1>
+        <p>Điểm tổng kết sẽ được tính tự động theo công thức 20% quá trình, 30% giữa kỳ và 50% cuối kỳ.</p>
+        <form method="post" class="styled-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-error">{{ field.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <div class="form-actions">
+                <button class="primary-button" type="submit">Lưu dữ liệu</button>
+                <a class="secondary-button" href="{% url 'students:score_list' %}">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

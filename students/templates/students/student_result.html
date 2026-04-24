@@ -1,0 +1,95 @@
+{% extends "students/base.html" %}
+
+{% block title %}Kết quả học tập{% endblock %}
+
+{% block extra_styles %}
+<style>
+.result-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+    padding: 18px;
+    border: 2px solid rgba(15, 118, 110, 0.14);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.result-toolbar p {
+    margin: 0;
+    color: #667085;
+}
+
+.result-export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <div>
+        <span class="eyebrow">Khu vực học sinh</span>
+        <h1>Kết quả học tập</h1>
+        <p>{{ student.full_name }} | {{ student.student_code }} | Lớp {{ student.class_name }}</p>
+    </div>
+    <div class="stats-inline">
+        <div class="mini-stat">
+            <strong>{{ average_score }}</strong>
+            <span>Điểm trung bình</span>
+        </div>
+        <div class="mini-stat">
+            <strong>{{ classification }}</strong>
+            <span>Học lực</span>
+        </div>
+    </div>
+</section>
+
+<section class="result-toolbar">
+    <div>
+        <strong>Xuất kết quả học tập</strong>
+        <p>Bạn có thể tải file mở bằng Excel hoặc mở bản in để lưu thành PDF.</p>
+    </div>
+    <div class="result-export-actions">
+        <a class="secondary-button" href="{% url 'students:student_result_excel' %}">Xuất Excel</a>
+        <a class="primary-button" href="{% url 'students:student_result_pdf' %}" target="_blank" rel="noopener">In / Lưu PDF</a>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Mã môn</th>
+                    <th>Môn học</th>
+                    <th>Quá trình</th>
+                    <th>Giữa kỳ</th>
+                    <th>Cuối kỳ</th>
+                    <th>Tổng kết</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                    <tr>
+                        <td>{{ score.subject.subject_code }}</td>
+                        <td>{{ score.subject.name }}</td>
+                        <td>{{ score.attendance_score }}</td>
+                        <td>{{ score.midterm_score }}</td>
+                        <td>{{ score.final_exam_score }}</td>
+                        <td><strong>{{ score.final_score }}</strong></td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-state">Chưa có dữ liệu điểm cho tài khoản này.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

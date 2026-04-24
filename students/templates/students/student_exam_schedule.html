@@ -1,0 +1,57 @@
+{% extends "students/base.html" %}
+
+{% block title %}Lịch thi{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <div>
+        <span class="eyebrow">Khu vực học sinh</span>
+        <h1>Lịch thi cá nhân</h1>
+        <p>Lịch thi của {{ student.full_name }} được hiển thị theo từng môn học.</p>
+    </div>
+</section>
+
+<section class="result-toolbar">
+    <div>
+        <strong>Xuất lịch thi</strong>
+        <p>Tải file Excel hoặc mở bản in PDF của toàn bộ lịch thi cá nhân.</p>
+    </div>
+    <div class="result-export-actions">
+        <a class="secondary-button" href="{% url 'students:student_exam_schedule_excel' %}">Xuất Excel</a>
+        <a class="primary-button" href="{% url 'students:student_exam_schedule_pdf' %}" target="_blank" rel="noopener">In / Lưu PDF</a>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ngày thi</th>
+                    <th>Giờ thi</th>
+                    <th>Môn học</th>
+                    <th>Phòng thi</th>
+                    <th>Số báo danh</th>
+                    <th>Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in exam_schedules %}
+                    <tr>
+                        <td>{{ item.exam_date|date:"d/m/Y" }}</td>
+                        <td>{{ item.start_time|time:"H:i" }}</td>
+                        <td>{{ item.subject.name }}</td>
+                        <td>{{ item.room }}</td>
+                        <td>{{ item.seat_number|default:"-" }}</td>
+                        <td>{{ item.note|default:"-" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-state">Chưa có lịch thi nào được gán cho bạn.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

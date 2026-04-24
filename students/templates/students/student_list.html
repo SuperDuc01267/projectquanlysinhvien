@@ -1,0 +1,54 @@
+{% extends "students/base.html" %}
+
+{% block title %}Quản lý sinh viên{% endblock %}
+
+{% block content %}
+<section class="section-header">
+    <div>
+        <span class="eyebrow">Quản trị viên</span>
+        <h1>Quản lý sinh viên</h1>
+        <p>Thêm, cập nhật và xóa hồ sơ sinh viên. Có thể liên kết tài khoản đăng nhập cho từng sinh viên.</p>
+    </div>
+    <a class="primary-button" href="{% url 'students:student_add' %}">Thêm sinh viên</a>
+</section>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Mã SV</th>
+                    <th>Họ tên</th>
+                    <th>Lớp</th>
+                    <th>Email</th>
+                    <th>Tài khoản</th>
+                    <th>Điểm TB</th>
+                    <th>Học lực</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                    <tr>
+                        <td>{{ student.student_code }}</td>
+                        <td>{{ student.full_name }}</td>
+                        <td>{{ student.class_name }}</td>
+                        <td>{{ student.email }}</td>
+                        <td>{{ student.user.username|default:"Chưa liên kết" }}</td>
+                        <td>{{ student.average_score }}</td>
+                        <td>{{ student.academic_classification }}</td>
+                        <td class="actions-cell">
+                            <a class="table-link" href="{% url 'students:student_edit' student.pk %}">Sửa</a>
+                            <a class="table-link danger" href="{% url 'students:student_delete' student.pk %}">Xóa</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-state">Chưa có sinh viên nào trong hệ thống.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
