@@ -138,8 +138,8 @@ class Score(models.Model):
     def calculate_final_score(self):
         total = (
             Decimal(self.attendance_score) * Decimal("0.2")
-            + Decimal(self.midterm_score) * Decimal("0.3")
-            + Decimal(self.final_exam_score) * Decimal("0.5")
+            + Decimal(self.midterm_score) * Decimal("0.2")
+            + Decimal(self.final_exam_score) * Decimal("0.6")
         )
         return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
