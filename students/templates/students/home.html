@@ -1,13 +1,8 @@
-{% extends "students/base.html" %}
-
-{% block title %}Trang chủ{% endblock %}
-
-{% block content %}
+{% extends "students/base.html" %} {% block title %}Trang chủ{% endblock %} {%
+block content %}
 <div class="hero-copy">
   <span class="eyebrow">Cổng thông tin sinh viên</span>
-  <h1>
-    Hệ thống quản lý điểm và thông tin sinh viên
-  </h1>
+  <h1>Hệ thống quản lý điểm và thông tin sinh viên</h1>
 
   <div class="hero-actions">
     {% if user.is_authenticated and not user.is_staff %}
@@ -28,10 +23,7 @@
   <div class="metric-card">
     <span>Truy cập nhanh</span>
     <strong>Học tập cá nhân</strong>
-    <p>
-      Xem điểm, lịch học, lịch thi và cập nhật hồ sơ sinh viên ngay trên một
-      cổng thống nhất.
-    </p>
+    <p>Xem điểm, lịch học, lịch thi và cập nhật hồ sơ sinh viên ngay</p>
   </div>
   <div class="metric-grid">
     <div class="metric-item">
