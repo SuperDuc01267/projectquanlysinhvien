@@ -35,6 +35,46 @@ body,
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
 }
 
+#user-tools.custom-user-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.custom-user-tools__welcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 4px;
+}
+
+#logout-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.custom-user-tools__logout {
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 44px;
+  background: #000 !important;
+  color: #fff !important;
+  box-shadow: none;
+}
+
+.custom-user-tools__logout:hover,
+.custom-user-tools__logout:focus {
+  background: #111 !important;
+  color: #fff !important;
+}
+
 #branding h1,
 #branding h1 a:link,
 #branding h1 a:visited {

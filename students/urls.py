@@ -1,4 +1,3 @@
-from django.contrib.auth.views import LogoutView
 from django.urls import path
 
 from . import views
@@ -9,7 +8,7 @@ app_name = "students"
 urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
     path("dang-nhap/", views.StudentLoginView.as_view(), name="login"),
-    path("dang-xuat/", LogoutView.as_view(), name="logout"),
+    path("dang-xuat/", views.StudentLogoutView.as_view(), name="logout"),
     path("trang-ca-nhan/", views.StudentProfileView.as_view(), name="student_profile"),
     path("ket-qua-hoc-tap/", views.StudentResultView.as_view(), name="student_result"),
     path("ket-qua-hoc-tap/excel/", views.StudentResultExcelView.as_view(), name="student_result_excel"),

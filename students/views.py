@@ -4,7 +4,7 @@ from io import BytesIO
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -313,6 +313,27 @@ class StudentLoginView(LoginView):
 
     def get_success_url(self):
         return reverse_lazy("students:student_result")
+
+
+class StudentLogoutView(LogoutView):
+    def get_next_page(self):
+        return reverse_lazy("students:home")
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response["Pragma"] = "no-cache"
+        response["Expires"] = "0"
+        return response
+
+
+def admin_portal_logout(request):
+    logout(request)
+    response = redirect("/admin/login/")
+    response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response
 
 
 class StudentListView(StaffRequiredMixin, ListView):

@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
+    path("admin/logout/", include("students.urls_admin_logout")),
     path("admin/", admin.site.urls),
     path("", include("students.urls")),
 ]
