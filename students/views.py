@@ -31,6 +31,7 @@ from .forms import (
 from .models import ExamSchedule, Schedule, Score, Student, Subject
 
 
+# Cấu hình thứ trong tuần dùng để dựng giao diện thời khóa biểu.
 TIMETABLE_DAYS = [
     ("2", "Thứ 2"),
     ("3", "Thứ 3"),
@@ -111,6 +112,7 @@ def get_selected_date(request):
 
 
 def build_excel_response(filename, title, metadata_rows, headers, rows):
+    # Bọc nội dung Excel bytes thành response để trình duyệt tải file.
     content = build_excel_bytes(title, metadata_rows, headers, rows)
     response = HttpResponse(
         content,
@@ -121,6 +123,7 @@ def build_excel_response(filename, title, metadata_rows, headers, rows):
 
 
 def build_excel_bytes(title, metadata_rows, headers, rows):
+    # Tạo file Excel bằng openpyxl và trả về nội dung ở dạng bytes.
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "Du lieu"
@@ -134,6 +137,7 @@ def build_excel_bytes(title, metadata_rows, headers, rows):
     thin_side = Side(style="thin", color="B8C4D4")
     border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
 
+    # Gộp hàng đầu để làm tiêu đề lớn cho toàn bộ bảng Excel.
     last_col = chr(ord("A") + len(headers) - 1)
     sheet.merge_cells(f"A1:{last_col}1")
     sheet["A1"] = title
@@ -143,6 +147,7 @@ def build_excel_bytes(title, metadata_rows, headers, rows):
     sheet.row_dimensions[1].height = 26
 
     current_row = 3
+    # Ghi các dòng thông tin chung: họ tên, mã sinh viên, ngày xuất...
     for label, value in metadata_rows:
         sheet[f"A{current_row}"] = label
         sheet[f"A{current_row}"].font = bold_font
@@ -150,6 +155,7 @@ def build_excel_bytes(title, metadata_rows, headers, rows):
         current_row += 1
 
     current_row += 1
+    # Ghi hàng header của bảng dữ liệu.
     for column_index, header in enumerate(headers, start=1):
         cell = sheet.cell(row=current_row, column=column_index, value=header)
         cell.font = bold_font
@@ -157,6 +163,7 @@ def build_excel_bytes(title, metadata_rows, headers, rows):
         cell.alignment = center
         cell.border = border
 
+    # Ghi từng dòng dữ liệu vào file Excel.
     for data_row in rows:
         current_row += 1
         for column_index, value in enumerate(data_row, start=1):
@@ -164,6 +171,7 @@ def build_excel_bytes(title, metadata_rows, headers, rows):
             cell.border = border
             cell.alignment = center if column_index != 2 else left
 
+    # Tự chỉnh độ rộng cột theo nội dung để file dễ đọc hơn.
     for column_index in range(1, len(headers) + 1):
         max_length = 0
         column_letter = get_column_letter(column_index)
@@ -181,6 +189,7 @@ def build_excel_bytes(title, metadata_rows, headers, rows):
 
 
 def build_pdf_bytes(title, metadata_rows, headers, rows):
+    # Tạo file PDF bằng reportlab và trả về bytes để tải/gửi mail.
     output = BytesIO()
     document = SimpleDocTemplate(output, pagesize=landscape(A4), leftMargin=24, rightMargin=24, topMargin=24, bottomMargin=24)
     styles = getSampleStyleSheet()
@@ -189,6 +198,7 @@ def build_pdf_bytes(title, metadata_rows, headers, rows):
         story.append(Paragraph(f"<b>{label}:</b> {value}", styles["Normal"]))
     story.append(Spacer(1, 12))
 
+    # Dựng dữ liệu bảng PDF từ hàng tiêu đề và các dòng dữ liệu.
     table_data = [headers] + rows
     table = Table(table_data, repeatRows=1)
     table.setStyle(
@@ -211,17 +221,18 @@ def build_pdf_bytes(title, metadata_rows, headers, rows):
 
 
 def send_export_email(student, mail_subject, filename, content, mimetype):
+    # Gửi file đã xuất (Excel/PDF) vào email sinh viên dưới dạng đính kèm.
     if not student.email:
-        return False, "Sinh vien chua co email de nhan file."
+        return False, "Sinh viên chưa có email để nhận file."
     try:
         message = EmailMessage(
             subject=mail_subject,
             body=(
-                f"Xin chao {student.full_name},\n\n"
-                f"He thong vua tao file '{filename}' cho ban. File duoc dinh kem trong email nay.\n\n"
-                "Truong hop ban khong yeu cau thao tac nay, vui long lien he quan tri vien."
+                f"Xin Chào {student.full_name},\n\n"
+                f"Hệ thống vừa tạo file '{filename}' cho bạn. File được đính kèm trong email này.\n\n"
+                "Trường hợp bạn không yêu cầu thao tác này, vui lòng liên hệ quản trị viên."
             ),
-            from_email="Student Management System <nguyenduc01267@gmail.com>",
+            from_email="Quản lý điểm sinh viên <nguyenduc01267@gmail.com>",
             to=[student.email],
         )
         message.attach(filename, content, mimetype)
@@ -554,21 +565,23 @@ class StudentProfileView(StudentPortalRequiredMixin, UpdateView):
 
 class StudentResultExcelView(StudentPortalRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
+        # Lấy bảng điểm của sinh viên để xuất Excel.
         scores = (
             Score.objects.select_related("subject")
             .filter(student=self.student)
             .order_by("subject__subject_code")
         )
         metadata_rows = [
-            ("Ho ten", self.student.full_name),
-            ("Ma sinh vien", self.student.student_code),
-            ("Lop", self.student.class_name),
+            ("Họ Tên", self.student.full_name),
+            ("Mã sinh viên", self.student.student_code),
+            ("Lớp", self.student.class_name),
             ("Email", self.student.email),
-            ("Diem trung binh", self.student.average_score()),
-            ("Hoc luc", self.student.academic_classification()),
-            ("Ngay xuat", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
+            ("Điểm trung bình", self.student.average_score()),
+            ("Học lực", self.student.academic_classification()),
+            ("Ngày xuất", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
         ]
-        headers = ["Ma mon", "Mon hoc", "Qua trinh", "Giua ky", "Cuoi ky", "Tong ket"]
+        headers = ["Mã môn", "Tên môn học", "Quá trình", "Giữa kỳ", "Cuối kỳ", "Tổng kết"]
+        # Chuyển dữ liệu điểm thành từng hàng trong file Excel.
         rows = [
             [
                 score.subject.subject_code,
@@ -582,22 +595,26 @@ class StudentResultExcelView(StudentPortalRequiredMixin, TemplateView):
         ]
         filename = f"ket-qua-hoc-tap-{self.student.student_code}.xlsx"
         content = build_excel_bytes("PHIEU KET QUA HOC TAP", metadata_rows, headers, rows)
+        # Sau khi tạo file, hệ thống gửi cùng file đó qua email.
         email_sent, email_error = send_export_email(
             self.student,
-            "Ket qua hoc tap dang dinh kem",
+            "Kết quả học tập của bạn",
             filename,
             content,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        if email_sent:
-            messages.success(request, f"Da gui file Excel vao email {self.student.email}.")
-        else:
-            messages.error(request, f"Khong gui duoc email: {email_error}")
+        # Trả file Excel trực tiếp cho trình duyệt tải về.
         response = HttpResponse(
             content,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response["X-Export-Status"] = "success" if email_sent else "error"
+        response["X-Export-Message"] = (
+            f"In thanh cong. Da gui file Excel vao email {self.student.email}."
+            if email_sent
+            else f"Khong gui duoc email: {email_error}"
+        )
         return response
 
 
@@ -605,21 +622,23 @@ class StudentResultPdfView(StudentPortalRequiredMixin, TemplateView):
     template_name = "students/student_result_pdf.html"
 
     def get(self, request, *args, **kwargs):
+        # Lấy bảng điểm để dựng file PDF gửi email.
         scores = (
             Score.objects.select_related("subject")
             .filter(student=self.student)
             .order_by("subject__subject_code")
         )
         metadata_rows = [
-            ("Ho ten", self.student.full_name),
-            ("Ma sinh vien", self.student.student_code),
-            ("Lop", self.student.class_name),
+            ("Họ tên", self.student.full_name),
+            ("Mã sinh viên", self.student.student_code),
+            ("Lớp", self.student.class_name),
             ("Email", self.student.email),
-            ("Diem trung binh", self.student.average_score()),
-            ("Hoc luc", self.student.academic_classification()),
-            ("Ngay xuat", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
+            ("Điểm trung bình", self.student.average_score()),
+            ("Học lực", self.student.academic_classification()),
+            ("Ngày xuất", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
         ]
-        headers = ["Ma mon", "Mon hoc", "Qua trinh", "Giua ky", "Cuoi ky", "Tong ket"]
+        headers = ["Mã môn", "Tên môn học", "Quá trình", "Giữa kỳ", "Cuối kỳ", "Tổng kết"]
+        # PDF dùng chuỗi để hiển thị dữ liệu ổn định trong bảng.
         rows = [
             [
                 score.subject.subject_code,
@@ -632,20 +651,26 @@ class StudentResultPdfView(StudentPortalRequiredMixin, TemplateView):
             for score in scores
         ]
         pdf_bytes = build_pdf_bytes("PHIEU KET QUA HOC TAP", metadata_rows, headers, rows)
+        # Gửi file PDF qua email sinh viên.
         email_sent, email_error = send_export_email(
             self.student,
-            "Phieu ket qua hoc tap dang dinh kem",
+            "Phiếu kết quả học tập của bạn",
             f"ket-qua-hoc-tap-{self.student.student_code}.pdf",
             pdf_bytes,
             "application/pdf",
         )
-        if email_sent:
-            messages.success(request, f"Da gui file PDF vao email {self.student.email}.")
-        else:
-            messages.error(request, f"Khong gui duoc email: {email_error}")
-        return super().get(request, *args, **kwargs)
+        # Vẫn render template HTML để người dùng in/lưu PDF trên trình duyệt.
+        response = super().get(request, *args, **kwargs)
+        response["X-Export-Status"] = "success" if email_sent else "error"
+        response["X-Export-Message"] = (
+            f"Xuat file PDF thanh cong va da gui email toi {self.student.email}."
+            if email_sent
+            else f"Khong gui duoc email: {email_error}"
+        )
+        return response
 
     def get_context_data(self, **kwargs):
+        # Cấp dữ liệu cho template HTML hiển thị bản in PDF.
         context = super().get_context_data(**kwargs)
         scores = (
             Score.objects.select_related("subject")
@@ -659,6 +684,8 @@ class StudentResultPdfView(StudentPortalRequiredMixin, TemplateView):
                 "average_score": self.student.average_score(),
                 "classification": self.student.academic_classification(),
                 "generated_at": timezone.localtime(),
+                "export_toast_message": f"Xuất file PDF thành công và đã gửi email tới {self.student.email}.",
+                "export_return_url": reverse_lazy("students:student_result"),
             }
         )
         return context
@@ -706,6 +733,7 @@ class StudentScheduleView(StudentPortalRequiredMixin, TemplateView):
 
 class StudentScheduleExcelView(StudentPortalRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
+        # Lọc thời khóa biểu theo ngày đang xem rồi xuất Excel.
         selected_date = get_selected_date(request)
         schedules = (
             Schedule.objects.select_related("subject")
@@ -714,12 +742,13 @@ class StudentScheduleExcelView(StudentPortalRequiredMixin, TemplateView):
             .order_by("weekday", "start_time")
         )
         metadata_rows = [
-            ("Ho ten", self.student.full_name),
-            ("Ma sinh vien", self.student.student_code),
-            ("Ngay xem lich", selected_date.strftime("%d/%m/%Y")),
-            ("Ngay xuat", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
+            ("Họ tên", self.student.full_name),
+            ("Mã sinh viên", self.student.student_code),
+            ("Ngày xem lịch", selected_date.strftime("%d/%m/%Y")),
+            ("Ngày xuất", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
         ]
-        headers = ["Thu", "Mon hoc", "Phong", "Bat dau", "Ket thuc", "Hieu luc tu", "Hieu luc den", "Ghi chu"]
+        headers = ["Thứ", "Môn học", "Phòng", "Bắt đầu", "Kết thúc", "Hiệu lực từ", "Hiệu lực đến", "Ghi chú"]
+        # Mỗi buổi học được đổi thành một dòng trong file Excel.
         rows = [
             [
                 item.get_weekday_display(),
@@ -735,6 +764,7 @@ class StudentScheduleExcelView(StudentPortalRequiredMixin, TemplateView):
         ]
         filename = f"thoi-khoa-bieu-{self.student.student_code}.xlsx"
         content = build_excel_bytes("THOI KHOA BIEU", metadata_rows, headers, rows)
+        # Gửi file Excel vừa tạo qua email cho sinh viên.
         email_sent, email_error = send_export_email(
             self.student,
             "Thoi khoa bieu dang dinh kem",
@@ -742,15 +772,18 @@ class StudentScheduleExcelView(StudentPortalRequiredMixin, TemplateView):
             content,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        if email_sent:
-            messages.success(request, f"Da gui file Excel vao email {self.student.email}.")
-        else:
-            messages.error(request, f"Khong gui duoc email: {email_error}")
+        # Trả file Excel cho trình duyệt tải trực tiếp.
         response = HttpResponse(
             content,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response["X-Export-Status"] = "success" if email_sent else "error"
+        response["X-Export-Message"] = (
+            f"In thanh cong. Da gui file Excel vao email {self.student.email}."
+            if email_sent
+            else f"Khong gui duoc email: {email_error}"
+        )
         return response
 
 
@@ -758,6 +791,7 @@ class StudentSchedulePdfView(StudentPortalRequiredMixin, TemplateView):
     template_name = "students/student_schedule_pdf.html"
 
     def get(self, request, *args, **kwargs):
+        # Lọc thời khóa biểu theo ngày rồi dựng file PDF để gửi mail.
         selected_date = get_selected_date(request)
         schedules = (
             Schedule.objects.select_related("subject")
@@ -766,12 +800,13 @@ class StudentSchedulePdfView(StudentPortalRequiredMixin, TemplateView):
             .order_by("weekday", "start_time")
         )
         metadata_rows = [
-            ("Ho ten", self.student.full_name),
-            ("Ma sinh vien", self.student.student_code),
-            ("Ngay xem lich", selected_date.strftime("%d/%m/%Y")),
-            ("Ngay xuat", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
+            ("Họ tên", self.student.full_name),
+            ("Mã sinh viên", self.student.student_code),
+            ("Ngày xem lịch", selected_date.strftime("%d/%m/%Y")),
+            ("Ngày xuất", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
         ]
-        headers = ["Thu", "Mon hoc", "Phong", "Bat dau", "Ket thuc", "Hieu luc"]
+        headers = ["Thứ", "Môn học", "Phòng", "Bắt đầu", "Kết thúc", "Hiệu lực"]
+        # Gom dữ liệu thời khóa biểu thành các hàng của bảng PDF.
         rows = [
             [
                 item.get_weekday_display(),
@@ -784,6 +819,7 @@ class StudentSchedulePdfView(StudentPortalRequiredMixin, TemplateView):
             for item in schedules
         ]
         pdf_bytes = build_pdf_bytes("THOI KHOA BIEU", metadata_rows, headers, rows)
+        # Gửi file PDF qua email cho sinh viên.
         email_sent, email_error = send_export_email(
             self.student,
             "Thoi khoa bieu dang dinh kem",
@@ -791,13 +827,18 @@ class StudentSchedulePdfView(StudentPortalRequiredMixin, TemplateView):
             pdf_bytes,
             "application/pdf",
         )
-        if email_sent:
-            messages.success(request, f"Da gui file PDF vao email {self.student.email}.")
-        else:
-            messages.error(request, f"Khong gui duoc email: {email_error}")
-        return super().get(request, *args, **kwargs)
+        # Đồng thời render template HTML để người dùng in/lưu PDF.
+        response = super().get(request, *args, **kwargs)
+        response["X-Export-Status"] = "success" if email_sent else "error"
+        response["X-Export-Message"] = (
+            f"Xuat file PDF thanh cong va da gui email toi {self.student.email}."
+            if email_sent
+            else f"Khong gui duoc email: {email_error}"
+        )
+        return response
 
     def get_context_data(self, **kwargs):
+        # Context cho template HTML hiển thị bản in thời khóa biểu.
         context = super().get_context_data(**kwargs)
         selected_date = get_selected_date(self.request)
         schedules = (
@@ -812,6 +853,8 @@ class StudentSchedulePdfView(StudentPortalRequiredMixin, TemplateView):
                 "selected_date": selected_date,
                 "schedules": schedules,
                 "generated_at": timezone.localtime(),
+                "export_toast_message": f"Xuất file PDF thành công và đã gửi email tới {self.student.email}.",
+                "export_return_url": f"{reverse_lazy('students:student_schedule')}?date={selected_date.strftime('%Y-%m-%d')}",
             }
         )
         return context
@@ -833,17 +876,19 @@ class StudentExamScheduleView(StudentPortalRequiredMixin, TemplateView):
 
 class StudentExamScheduleExcelView(StudentPortalRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
+        # Lấy lịch thi cá nhân và xuất thành file Excel.
         exam_schedules = (
             ExamSchedule.objects.select_related("subject")
             .filter(student=self.student)
             .order_by("exam_date", "start_time")
         )
         metadata_rows = [
-            ("Ho ten", self.student.full_name),
-            ("Ma sinh vien", self.student.student_code),
-            ("Ngay xuat", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
+            ("Họ tên", self.student.full_name),
+            ("Mã sinh viên", self.student.student_code),
+            ("Ngày xuất", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
         ]
-        headers = ["Ngay thi", "Gio thi", "Mon hoc", "Phong thi", "So bao danh", "Ghi chu"]
+        headers = ["Ngày thi", "Giờ thi", "Môn học", "Phòng thi", "Số báo danh", "Ghi chú"]
+        # Chuyển từng lịch thi thành một hàng dữ liệu trong sheet Excel.
         rows = [
             [
                 item.exam_date.strftime("%d/%m/%Y"),
@@ -857,6 +902,7 @@ class StudentExamScheduleExcelView(StudentPortalRequiredMixin, TemplateView):
         ]
         filename = f"lich-thi-{self.student.student_code}.xlsx"
         content = build_excel_bytes("LICH THI", metadata_rows, headers, rows)
+        # Gửi file Excel qua email sinh viên.
         email_sent, email_error = send_export_email(
             self.student,
             "Lich thi dang dinh kem",
@@ -864,15 +910,18 @@ class StudentExamScheduleExcelView(StudentPortalRequiredMixin, TemplateView):
             content,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        if email_sent:
-            messages.success(request, f"Da gui file Excel vao email {self.student.email}.")
-        else:
-            messages.error(request, f"Khong gui duoc email: {email_error}")
+        # Trả file Excel để trình duyệt tải về.
         response = HttpResponse(
             content,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response["X-Export-Status"] = "success" if email_sent else "error"
+        response["X-Export-Message"] = (
+            f"In thanh cong. Da gui file Excel vao email {self.student.email}."
+            if email_sent
+            else f"Khong gui duoc email: {email_error}"
+        )
         return response
 
 
@@ -880,17 +929,19 @@ class StudentExamSchedulePdfView(StudentPortalRequiredMixin, TemplateView):
     template_name = "students/student_exam_schedule_pdf.html"
 
     def get(self, request, *args, **kwargs):
+        # Lấy lịch thi cá nhân và dựng file PDF để gửi email.
         exam_schedules = (
             ExamSchedule.objects.select_related("subject")
             .filter(student=self.student)
             .order_by("exam_date", "start_time")
         )
         metadata_rows = [
-            ("Ho ten", self.student.full_name),
-            ("Ma sinh vien", self.student.student_code),
-            ("Ngay xuat", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
+            ("Họ tên", self.student.full_name),
+            ("Mã sinh viên", self.student.student_code),
+            ("Ngày xuất", timezone.localtime().strftime("%d/%m/%Y %H:%M")),
         ]
-        headers = ["Ngay thi", "Gio thi", "Mon hoc", "Phong thi", "So bao danh", "Ghi chu"]
+        headers = ["Ngày thi", "Giờ thi", "Môn học", "Phòng thi", "Số báo danh", "Ghi chú"]
+        # Tạo các hàng dữ liệu cho bảng PDF lịch thi.
         rows = [
             [
                 item.exam_date.strftime("%d/%m/%Y"),
@@ -902,21 +953,27 @@ class StudentExamSchedulePdfView(StudentPortalRequiredMixin, TemplateView):
             ]
             for item in exam_schedules
         ]
-        pdf_bytes = build_pdf_bytes("LICH THI", metadata_rows, headers, rows)
+        pdf_bytes = build_pdf_bytes("LỊCH THI", metadata_rows, headers, rows)
+        # Gửi file PDF cho sinh viên qua email.
         email_sent, email_error = send_export_email(
             self.student,
-            "Lich thi dang dinh kem",
+            "Lịch thi đang đính kèm",
             f"lich-thi-{self.student.student_code}.pdf",
             pdf_bytes,
             "application/pdf",
         )
-        if email_sent:
-            messages.success(request, f"Da gui file PDF vao email {self.student.email}.")
-        else:
-            messages.error(request, f"Khong gui duoc email: {email_error}")
-        return super().get(request, *args, **kwargs)
+        # Sau đó render template HTML để người dùng in/lưu PDF.
+        response = super().get(request, *args, **kwargs)
+        response["X-Export-Status"] = "success" if email_sent else "error"
+        response["X-Export-Message"] = (
+            f"Xuat file PDF thanh cong va da gui email toi {self.student.email}."
+            if email_sent
+            else f"Khong gui duoc email: {email_error}"
+        )
+        return response
 
     def get_context_data(self, **kwargs):
+        # Context cho template HTML bản in lịch thi.
         context = super().get_context_data(**kwargs)
         exam_schedules = (
             ExamSchedule.objects.select_related("subject")
@@ -928,6 +985,8 @@ class StudentExamSchedulePdfView(StudentPortalRequiredMixin, TemplateView):
                 "student": self.student,
                 "exam_schedules": exam_schedules,
                 "generated_at": timezone.localtime(),
+                "export_toast_message": f"Xuất file PDF thành công và đã gửi email tới {self.student.email}.",
+                "export_return_url": reverse_lazy("students:student_exam_schedule"),
             }
         )
         return context

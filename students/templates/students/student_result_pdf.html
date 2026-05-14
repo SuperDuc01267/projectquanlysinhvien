@@ -121,8 +121,37 @@
         </table>
 
         <div class="print-actions">
-            <button onclick="window.print()">In / Lưu PDF</button>
+            <button onclick="startPrint()">In / Lưu PDF</button>
         </div>
     </div>
+    <script>
+        let printHandled = false;
+
+        function finalizePrintFlow() {
+            if (printHandled) {
+                return;
+            }
+            printHandled = true;
+            if (window.opener && !window.opener.closed) {
+                try {
+                    window.opener.localStorage.setItem(
+                        "post_print_toast",
+                        JSON.stringify({
+                            message: "{{ export_toast_message|escapejs }}",
+                            type: "success"
+                        })
+                    );
+                    window.opener.location.href = "{{ export_return_url|escapejs }}";
+                } catch (error) {}
+            }
+            window.close();
+        }
+
+        function startPrint() {
+            window.print();
+        }
+
+        window.addEventListener("afterprint", finalizePrintFlow);
+    </script>
 </body>
 </html>

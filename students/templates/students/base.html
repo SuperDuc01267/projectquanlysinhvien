@@ -6,9 +6,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Hệ thống xử lý điểm sinh viên{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'students/styles.css' %}">
+    <style>
+        #toast-stack.toast-stack {
+            position: fixed !important;
+            right: 18px !important;
+            bottom: 18px !important;
+            top: auto !important;
+            left: auto !important;
+            z-index: 99999 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            gap: 10px !important;
+            width: min(320px, calc(100vw - 20px)) !important;
+            pointer-events: none !important;
+        }
+
+        #toast-stack .toast {
+            position: relative !important;
+            width: 100% !important;
+            max-width: 320px !important;
+            margin: 0 !important;
+            padding: 11px 38px 11px 14px !important;
+            border-radius: 14px !important;
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16) !important;
+            border: 1px solid rgba(255, 255, 255, 0.72) !important;
+            background: rgba(240, 253, 248, 0.98) !important;
+            color: #047857 !important;
+            overflow: hidden !important;
+            pointer-events: auto !important;
+        }
+
+        #toast-stack .toast::before {
+            content: "" !important;
+            position: absolute !important;
+            top: 10px !important;
+            left: 0 !important;
+            bottom: 10px !important;
+            width: 4px !important;
+            border-radius: 0 999px 999px 0 !important;
+            background: currentColor !important;
+        }
+
+        #toast-stack .toast-success {
+            background: rgba(240, 253, 248, 0.98) !important;
+            color: #047857 !important;
+        }
+
+        #toast-stack .toast-error {
+            background: rgba(254, 242, 242, 0.98) !important;
+            color: #b91c1c !important;
+        }
+
+        #toast-stack .toast-info {
+            background: rgba(239, 246, 255, 0.98) !important;
+            color: #1d4ed8 !important;
+        }
+
+        #toast-stack .toast-body {
+            line-height: 1.35 !important;
+            font-weight: 600 !important;
+            font-size: 0.88rem !important;
+            letter-spacing: -0.01em !important;
+        }
+
+        #toast-stack .toast-close {
+            position: absolute !important;
+            top: 8px !important;
+            right: 8px !important;
+            width: 22px !important;
+            height: 22px !important;
+            border: 0 !important;
+            border-radius: 999px !important;
+            background: rgba(255, 255, 255, 0.35) !important;
+            color: inherit !important;
+            cursor: pointer !important;
+            font-size: 0.9rem !important;
+            line-height: 1 !important;
+        }
+
+        #toast-stack .toast.is-hiding {
+            opacity: 0 !important;
+            transform: translateY(10px) !important;
+            transition: opacity 0.22s ease, transform 0.22s ease !important;
+        }
+
+        @media (max-width: 640px) {
+            #toast-stack.toast-stack {
+                right: 10px !important;
+                bottom: 10px !important;
+                left: 10px !important;
+                width: auto !important;
+                align-items: stretch !important;
+            }
+
+            #toast-stack .toast {
+                max-width: none !important;
+            }
+        }
+    </style>
     {% block extra_styles %}{% endblock %}
 </head>
 <body>
+    <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast toast-{{ message.tags|default:'info' }}" data-toast>
+                    <button class="toast-close" type="button" aria-label="Dong thong bao" data-toast-close>&times;</button>
+                    <div class="toast-body">{{ message }}</div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
     <header class="topbar">
         <div class="container topbar-inner">
             {% if user.is_authenticated and not user.is_staff %}
@@ -57,12 +166,136 @@
     </header>
 
     <main class="container page-content">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="flash flash-{{ message.tags|default:'info' }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
         {% block content %}{% endblock %}
     </main>
+    <script>
+        (function () {
+            const toastStack = document.getElementById("toast-stack");
+
+            function dismissToast(toast) {
+                if (!toast) {
+                    return;
+                }
+                toast.classList.add("is-hiding");
+                window.setTimeout(() => toast.remove(), 220);
+            }
+
+            function attachToast(toast) {
+                const closeButton = toast.querySelector("[data-toast-close]");
+                if (closeButton) {
+                    closeButton.addEventListener("click", () => dismissToast(toast));
+                }
+                window.setTimeout(() => dismissToast(toast), 4200);
+            }
+
+            function showToast(message, type) {
+                if (!toastStack || !message) {
+                    return;
+                }
+                const toast = document.createElement("div");
+                toast.className = `toast toast-${type || "success"}`;
+                toast.setAttribute("data-toast", "");
+                toast.innerHTML = '<button class="toast-close" type="button" aria-label="Dong thong bao" data-toast-close>&times;</button><div class="toast-body"></div>';
+                toast.querySelector(".toast-body").textContent = message;
+                toastStack.appendChild(toast);
+                attachToast(toast);
+            }
+            window.showAppToast = showToast;
+
+            function getDownloadFilename(response) {
+                const contentDisposition = response.headers.get("Content-Disposition") || "";
+                const match = contentDisposition.match(/filename=\"?([^\";]+)\"?/i);
+                return match ? match[1] : "export.xlsx";
+            }
+
+            function getExportFeedback(response, fallbackMessage) {
+                return {
+                    type: response.headers.get("X-Export-Status") === "error" ? "error" : "success",
+                    message: response.headers.get("X-Export-Message") || fallbackMessage,
+                };
+            }
+
+            async function handleExportDownload(link) {
+                const response = await fetch(link.href, {
+                    method: "GET",
+                    credentials: "same-origin",
+                });
+
+                if (!response.ok) {
+                    throw new Error("Khong the tai file xuat.");
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const anchor = document.createElement("a");
+                anchor.href = downloadUrl;
+                anchor.download = getDownloadFilename(response);
+                document.body.appendChild(anchor);
+                anchor.click();
+                anchor.remove();
+                window.setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 1000);
+
+                const feedback = getExportFeedback(response, "Xuat file Excel thanh cong.");
+                showToast(feedback.message, feedback.type);
+            }
+
+            async function handlePdfExport(link) {
+                const popup = window.open("", "_blank");
+                if (!popup) {
+                    throw new Error("Trinh duyet dang chan cua so PDF moi.");
+                }
+
+                popup.document.write("<!DOCTYPE html><title>Dang tai PDF...</title><body style='font-family:Segoe UI,sans-serif;padding:24px'>Dang tao file PDF...</body>");
+                popup.document.close();
+
+                const response = await fetch(link.href, {
+                    method: "GET",
+                    credentials: "same-origin",
+                });
+
+                if (!response.ok) {
+                    popup.close();
+                    throw new Error("Khong the xuat file PDF.");
+                }
+
+                const html = await response.text();
+                popup.document.open();
+                popup.document.write(html);
+                popup.document.close();
+            }
+
+            document.querySelectorAll("[data-toast]").forEach(attachToast);
+            try {
+                const savedToast = window.localStorage.getItem("post_print_toast");
+                if (savedToast) {
+                    const payload = JSON.parse(savedToast);
+                    window.localStorage.removeItem("post_print_toast");
+                    showToast(payload.message, payload.type || "success");
+                }
+            } catch (error) {
+                window.localStorage.removeItem("post_print_toast");
+            }
+            document.querySelectorAll("[data-export-download]").forEach((link) => {
+                link.addEventListener("click", async (event) => {
+                    event.preventDefault();
+                    try {
+                        await handleExportDownload(link);
+                    } catch (error) {
+                        showToast(error.message || "Khong the tai file xuat.", "error");
+                    }
+                });
+            });
+            document.querySelectorAll("[data-export-pdf]").forEach((link) => {
+                link.addEventListener("click", async (event) => {
+                    event.preventDefault();
+                    try {
+                        await handlePdfExport(link);
+                    } catch (error) {
+                        showToast(error.message || "Khong the xuat file PDF.", "error");
+                    }
+                });
+            });
+        })();
+    </script>
 </body>
 </html>

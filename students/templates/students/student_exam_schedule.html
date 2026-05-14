@@ -17,8 +17,8 @@
         <p>Tải file Excel hoặc mở bản in PDF của toàn bộ lịch thi cá nhân.</p>
     </div>
     <div class="result-export-actions">
-        <a class="secondary-button" href="{% url 'students:student_exam_schedule_excel' %}">Xuất Excel</a>
-        <a class="primary-button" href="{% url 'students:student_exam_schedule_pdf' %}" target="_blank" rel="noopener">In / Lưu PDF</a>
+        <a class="secondary-button" href="{% url 'students:student_exam_schedule_excel' %}" data-export-download>Xuất Excel</a>
+        <a class="primary-button" href="{% url 'students:student_exam_schedule_pdf' %}" target="_blank" rel="noopener" data-export-pdf>In / Lưu PDF</a>
     </div>
 </section>
 

@@ -55,8 +55,8 @@
         <p>Bạn có thể tải file mở bằng Excel hoặc mở bản in để lưu thành PDF.</p>
     </div>
     <div class="result-export-actions">
-        <a class="secondary-button" href="{% url 'students:student_result_excel' %}">Xuất Excel</a>
-        <a class="primary-button" href="{% url 'students:student_result_pdf' %}" target="_blank" rel="noopener">In / Lưu PDF</a>
+        <a class="secondary-button" href="{% url 'students:student_result_excel' %}" data-export-download>Xuất Excel</a>
+        <a class="primary-button" href="{% url 'students:student_result_pdf' %}" target="_blank" rel="noopener" data-export-pdf>In / Lưu PDF</a>
     </div>
 </section>
 

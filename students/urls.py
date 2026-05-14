@@ -6,19 +6,24 @@ from . import views
 app_name = "students"
 
 urlpatterns = [
+    # Nhóm route cho cổng sinh viên.
     path("", views.HomeView.as_view(), name="home"),
     path("dang-nhap/", views.StudentLoginView.as_view(), name="login"),
     path("dang-xuat/", views.StudentLogoutView.as_view(), name="logout"),
     path("trang-ca-nhan/", views.StudentProfileView.as_view(), name="student_profile"),
     path("ket-qua-hoc-tap/", views.StudentResultView.as_view(), name="student_result"),
+    # Route xuất kết quả học tập ra Excel/PDF.
     path("ket-qua-hoc-tap/excel/", views.StudentResultExcelView.as_view(), name="student_result_excel"),
     path("ket-qua-hoc-tap/pdf/", views.StudentResultPdfView.as_view(), name="student_result_pdf"),
     path("thoi-khoa-bieu/", views.StudentScheduleView.as_view(), name="student_schedule"),
+    # Route xuất thời khóa biểu ra Excel/PDF.
     path("thoi-khoa-bieu/excel/", views.StudentScheduleExcelView.as_view(), name="student_schedule_excel"),
     path("thoi-khoa-bieu/pdf/", views.StudentSchedulePdfView.as_view(), name="student_schedule_pdf"),
     path("lich-thi/", views.StudentExamScheduleView.as_view(), name="student_exam_schedule"),
+    # Route xuất lịch thi ra Excel/PDF.
     path("lich-thi/excel/", views.StudentExamScheduleExcelView.as_view(), name="student_exam_schedule_excel"),
     path("lich-thi/pdf/", views.StudentExamSchedulePdfView.as_view(), name="student_exam_schedule_pdf"),
+    # Nhóm route CRUD cho admin/staff.
     path("students/", views.StudentListView.as_view(), name="student_list"),
     path("students/add/", views.StudentCreateView.as_view(), name="student_add"),
     path("students/<int:pk>/edit/", views.StudentUpdateView.as_view(), name="student_edit"),

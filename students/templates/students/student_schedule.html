@@ -68,21 +68,23 @@
 }
 
 .timetable-panel {
-    padding: 20px;
-    border: 2px solid rgba(17, 32, 54, 0.12);
+    padding: 12px;
+    border: 1px solid rgba(17, 32, 54, 0.08);
+    background: rgba(255, 255, 255, 0.96);
 }
 
 .timetable-board-wrap {
     overflow-x: auto;
-    padding-bottom: 8px;
+    padding: 2px 2px 14px;
 }
 
 .timetable-board {
     display: grid;
-    grid-template-columns: 120px repeat(7, minmax(110px, 1fr));
-    --row-h: 68px;
+    grid-template-columns: 72px repeat(7, minmax(132px, 1fr));
+    --row-h: 48px;
     grid-auto-rows: var(--row-h);
-    gap: 8px;
+    gap: 2px;
+    min-width: 980px;
 }
 
 .timetable-corner,
@@ -90,7 +92,7 @@
 .timetable-time-cell,
 .timetable-grid-cell,
 .timetable-card {
-    border-radius: 18px;
+    border-radius: 12px;
 }
 
 .timetable-corner,
@@ -99,10 +101,10 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.98);
-    border: 2px solid rgba(17, 32, 54, 0.08);
-    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+    padding: 8px 6px;
+    background: #ffffff;
+    border: 1px solid rgba(132, 151, 176, 0.82);
+    box-shadow: none;
 }
 
 .timetable-corner {
@@ -110,82 +112,331 @@
     text-align: center;
     font-weight: 700;
     color: #0f766e;
+    font-size: 0.78rem;
 }
 
 .timetable-day-header {
     align-items: center;
     text-align: center;
-    gap: 4px;
+    gap: 2px;
     font-weight: 700;
-    border-color: rgba(15, 118, 110, 0.16);
-    background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(29, 78, 216, 0.14));
+    min-height: 44px;
+    border-color: rgba(116, 184, 202, 0.45);
+    background: linear-gradient(180deg, #e8f3fb, #d9e8f8);
+}
+
+.timetable-day-header strong {
+    font-size: 0.84rem;
+    line-height: 1.1;
 }
 
 .timetable-day-header span {
-    font-size: 0.9rem;
+    font-size: 0.66rem;
     color: #667085;
 }
 
 .timetable-day-header.is-selected {
-    border-color: rgba(15, 118, 110, 0.55);
-    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    border-color: rgba(15, 118, 110, 0.65);
+    box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.34);
+}
+
+.timetable-time-cell {
+    align-items: flex-start;
+    text-align: left;
 }
 
 .timetable-time-cell span {
     color: #667085;
-    margin-top: 6px;
-    font-size: 0.92rem;
+    margin-top: 2px;
+    font-size: 0.54rem;
+    line-height: 1.2;
+}
+
+.timetable-time-cell strong {
+    font-size: 0.72rem;
+    line-height: 1.15;
 }
 
 .timetable-grid-cell {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(240, 247, 255, 0.96));
-    border: 2px dashed rgba(17, 32, 54, 0.12);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px dashed rgba(146, 167, 191, 0.95);
 }
 
 .timetable-card {
     z-index: 2;
     align-self: stretch;
-    padding: 8px 10px;
+    padding: 7px 8px;
     color: white;
-    background: linear-gradient(160deg, #0f766e, #1d4ed8);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 10px 22px rgba(29, 78, 216, 0.14);
+    background: linear-gradient(180deg, #1d7f96 0%, #2b62d5 100%);
+    border: 1px solid rgba(175, 220, 255, 0.95);
+    box-shadow: 0 4px 10px rgba(29, 78, 216, 0.14);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 2px;
     overflow: hidden;
 }
 
 .timetable-card strong {
-    font-size: 0.95rem;
-    line-height: 1.2;
+    font-size: 0.57rem;
+    line-height: 1.08;
     display: block;
-    margin-bottom: 6px;
-}
-
-.timetable-card span,
-.timetable-card small,
-.timetable-card p {
     margin: 0;
-    color: rgba(255, 255, 255, 0.92);
+    letter-spacing: -0.01em;
 }
 
-.timetable-card p {
-    font-size: 0.78rem;
-    line-height: 1.2;
+.timetable-card-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    word-break: break-word;
 }
 
-.timetable-card small {
+.timetable-card-meta,
+.timetable-card-note {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.timetable-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 0.42rem;
+    line-height: 1.03;
+}
+
+.timetable-card-room {
+    font-weight: 700;
+}
+
+.timetable-card-note {
+    font-size: 0.41rem;
+    line-height: 1.04;
+    opacity: 0.96;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    word-break: break-word;
+    margin-top: auto;
+    padding-top: 2px;
+}
+
+.timetable-card[data-row-span="1"] {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    justify-content: center;
+}
+
+.timetable-card[data-row-span="1"] .timetable-card-title {
+    -webkit-line-clamp: 1;
+}
+
+.timetable-card[data-row-span="1"] .timetable-card-meta {
+    font-size: 0.39rem;
+}
+
+.timetable-card[data-row-span="1"] .timetable-card-time,
+.timetable-card[data-row-span="1"] .timetable-card-range,
+.timetable-card[data-row-span="1"] .timetable-card-note {
+    display: none;
+}
+
+.timetable-card[data-row-span="2"] {
+    justify-content: center;
+}
+
+.timetable-card[data-row-span="2"] .timetable-card-title {
+    -webkit-line-clamp: 2;
+}
+
+.timetable-card[data-row-span="2"] .timetable-card-meta {
+    font-size: 0.39rem;
+}
+
+.timetable-card[data-row-span="2"] .timetable-card-range,
+.timetable-card[data-row-span="2"] .timetable-card-note {
+    display: none;
+}
+
+.timetable-card[data-row-span="3"] {
+    justify-content: flex-start;
+}
+
+.timetable-card[data-row-span="3"] .timetable-card-meta {
+    font-size: 0.4rem;
+}
+
+.timetable-card[data-row-span="3"] .timetable-card-range {
+    display: none;
+}
+
+.timetable-card[data-row-span="3"] .timetable-card-note {
+    display: none;
+}
+
+.timetable-card[data-row-span="4"] .timetable-card-meta,
+.timetable-card[data-row-span="5"] .timetable-card-meta {
+    font-size: 0.41rem;
+}
+
+.timetable-card[data-row-span="4"] .timetable-card-note,
+.timetable-card[data-row-span="5"] .timetable-card-note {
+    font-size: 0.4rem;
+}
+
+.schedule-mobile-list {
+    display: none;
+}
+
+.schedule-mobile-card {
+    padding: 18px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 247, 255, 0.96));
+    border: 1px solid rgba(17, 32, 54, 0.1);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.schedule-mobile-card + .schedule-mobile-card {
+    margin-top: 14px;
+}
+
+.schedule-mobile-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.schedule-mobile-head strong {
     display: block;
-    font-size: 0.75rem;
-    opacity: 0.95;
+    font-size: 1rem;
+    line-height: 1.35;
+    margin-bottom: 4px;
+}
+
+.schedule-mobile-day {
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.1);
+    color: #0f766e;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.schedule-mobile-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+}
+
+.schedule-mobile-meta div {
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(17, 32, 54, 0.08);
+}
+
+.schedule-mobile-meta span {
+    display: block;
+    margin-bottom: 4px;
+    color: #667085;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.schedule-mobile-note {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(15, 118, 110, 0.08);
+    color: #24415c;
+    line-height: 1.45;
 }
 
 @media (max-width: 980px) {
+    .schedule-filter-bar,
+    .result-toolbar {
+        padding: 16px;
+    }
+
+    .schedule-filter-form {
+        width: 100%;
+    }
+
+    .schedule-filter-form > div,
+    .schedule-filter-form input {
+        width: 100%;
+    }
+
+    .schedule-week-note {
+        width: 100%;
+    }
+
     .timetable-board {
-        grid-template-columns: 130px repeat(7, minmax(140px, 1fr));
-        grid-auto-rows: 96px;
-        min-width: 1140px;
+        grid-template-columns: 70px repeat(7, minmax(126px, 1fr));
+        grid-auto-rows: 46px;
+        min-width: 950px;
+    }
+}
+
+@media (max-width: 760px) {
+    .schedule-filter-bar,
+    .result-toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .schedule-filter-form {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-filter-form button,
+    .result-export-actions a {
+        width: 100%;
+    }
+
+    .result-export-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .timetable-board-wrap {
+        display: none;
+    }
+
+    .schedule-mobile-list {
+        display: block;
+    }
+
+    .timetable-panel {
+        padding: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    .schedule-mobile-card {
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .schedule-mobile-head {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .schedule-mobile-day {
+        justify-self: start;
+    }
+
+    .schedule-mobile-meta {
+        grid-template-columns: 1fr;
     }
 }
 </style>
@@ -219,8 +470,8 @@
         <p>Tải file Excel hoặc mở bản in PDF theo ngày bạn đang lọc.</p>
     </div>
     <div class="result-export-actions">
-        <a class="secondary-button" href="{% url 'students:student_schedule_excel' %}?date={{ selected_date|date:'Y-m-d' }}">Xuất Excel</a>
-        <a class="primary-button" href="{% url 'students:student_schedule_pdf' %}?date={{ selected_date|date:'Y-m-d' }}" target="_blank" rel="noopener">In / Lưu PDF</a>
+        <a class="secondary-button" href="{% url 'students:student_schedule_excel' %}?date={{ selected_date|date:'Y-m-d' }}" data-export-download>Xuất Excel</a>
+        <a class="primary-button" href="{% url 'students:student_schedule_pdf' %}?date={{ selected_date|date:'Y-m-d' }}" target="_blank" rel="noopener" data-export-pdf>In / Lưu PDF</a>
     </div>
 </section>
 
@@ -247,17 +498,45 @@
             {% endfor %}
 
             {% for card in timetable_cards %}
-            <article class="timetable-card" style="grid-column: {{ card.grid_column }}; grid-row: {{ card.grid_row }} / span {{ card.row_span }};">
-                <strong>{{ card.item.subject.name }}</strong>
-                <span>Phòng: {{ card.item.room }}</span>
-                <small>{{ card.item.start_time|time:"H:i" }} - {{ card.item.end_time|time:"H:i" }}</small>
-                <small>Hiệu lực: {{ card.item.effective_from|date:"d/m/Y" }} - {{ card.item.effective_to|date:"d/m/Y" }}</small>
+            <article class="timetable-card" data-row-span="{{ card.row_span }}" style="grid-column: {{ card.grid_column }}; grid-row: {{ card.grid_row }} / span {{ card.row_span }};">
+                <strong class="timetable-card-title">{{ card.item.subject.name }}</strong>
+                <div class="timetable-card-meta">
+                    <div class="timetable-card-room">Phòng: {{ card.item.room }}</div>
+                    <div class="timetable-card-time">{{ card.item.start_time|time:"H:i" }} - {{ card.item.end_time|time:"H:i" }}</div>
+                    <div class="timetable-card-range">Hiệu lực: {{ card.item.effective_from|date:"d/m/Y" }} - {{ card.item.effective_to|date:"d/m/Y" }}</div>
+                </div>
                 {% if card.item.note %}
-                <p>{{ card.item.note }}</p>
+                <p class="timetable-card-note">{{ card.item.note }}</p>
                 {% endif %}
             </article>
             {% endfor %}
         </div>
+    </div>
+    <div class="schedule-mobile-list">
+        {% for item in schedules %}
+        <article class="schedule-mobile-card">
+            <div class="schedule-mobile-head">
+                <div>
+                    <strong>{{ item.subject.name }}</strong>
+                    <div>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</div>
+                </div>
+                <div class="schedule-mobile-day">{{ item.get_weekday_display }}</div>
+            </div>
+            <div class="schedule-mobile-meta">
+                <div>
+                    <span>Phòng</span>
+                    {{ item.room }}
+                </div>
+                <div>
+                    <span>Hiệu lực</span>
+                    {{ item.effective_from|date:"d/m/Y" }} - {{ item.effective_to|date:"d/m/Y" }}
+                </div>
+            </div>
+            {% if item.note %}
+            <div class="schedule-mobile-note">{{ item.note }}</div>
+            {% endif %}
+        </article>
+        {% endfor %}
     </div>
     {% else %}
     <div class="empty-state">Không có lịch học nào có hiệu lực tại ngày bạn đã chọn.</div>
